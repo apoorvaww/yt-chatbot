@@ -32,12 +32,12 @@ export async function POST(request: Request) {
         }
 
         //// TEXT SPLITTING: 
-        const spliter = new RecursiveCharacterTextSplitter({
+        const splitter = new RecursiveCharacterTextSplitter({
             chunkSize: 1000,
             chunkOverlap: 200
         })
 
-        const chunks = await spliter.createDocuments([transcript])
+        const chunks = await splitter.createDocuments([transcript])
 
         console.log("chunks: ", chunks[0])
 
@@ -55,7 +55,8 @@ export async function POST(request: Request) {
             chunks,
             embeddings, {
             collectionName: "test-collection",
-            url: "http://localhost:8000"
+            url: "http://127.0.0.1:8000"   
+
         }
         )
 
