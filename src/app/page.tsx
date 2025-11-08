@@ -71,13 +71,19 @@ export default function Page() {
     setIsReplying(true);
     setError(" ");
 
-    const newHistory: Message[] = [
-      ...chatHistory,
-      { role: "user", content: "question" },
-    ];
-    setChatHistory(newHistory);
-    const userQuestion = question;
+    const userQuestion = question.trim();
     setQuestion("");
+
+    setChatHistory(prev => [
+      ...prev,
+      {role: "user", content: userQuestion}
+    ])
+
+    // const newHistory: Message[] = [
+    //   ...chatHistory,
+    //   { role: "user", content: userQuestion },
+    // ];
+    // setChatHistory(newHistory);
 
     try {
       const response = await axios.post("/api/chat", {
@@ -90,8 +96,11 @@ export default function Page() {
         throw new Error(error.error || "Failed to get answer");
       }
 
-      const { answer } = await response.data;
-      setChatHistory([...newHistory, { role: "bot", content: answer }]);
+      const { answer } = response.data;
+      setChatHistory(prev => [
+        ...prev,
+        {role: "bot", content: answer}
+      ]);
     } catch (error) {
       const axiosError = error as AxiosErrorResponse;
 
@@ -105,30 +114,13 @@ export default function Page() {
     }
   };
 
-  const styles = {
-    container:
-      "w-full max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10",
-    form: "flex gap-2 mb-4",
-    input: "flex-grow p-2 border rounded-md",
-    button: "px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-gray-400",
-    chatBox: "h-96 overflow-y-auto border rounded-md p-4 mb-4 bg-gray-50",
-    userMsg: "text-right mb-3",
-    botMsg: "text-left mb-3",
-    msgBubble: "inline-block px-4 py-2 rounded-lg",
-    userBubble: "bg-blue-500 text-white",
-    botBubble: "bg-gray-200 text-gray-800",
-    error: "text-red-500 mt-4 text-center",
-  };
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-8 flex justify-center">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
-        {/* Header */}
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
           YouTube Video Chatbot
         </h1>
 
-        {/* Load Video Form */}
         <form onSubmit={handleProcessVideo} className="flex gap-3 mb-6">
           <input
             type="text"
@@ -152,7 +144,6 @@ export default function Page() {
           </button>
         </form>
 
-        {/* Chat Box */}
         <div className="h-96 overflow-y-auto border rounded-xl bg-gray-50 p-5 space-y-4 shadow-inner">
           {!videoLoaded && chatHistory.length === 0 && (
             <p className="text-center text-gray-500">
@@ -168,7 +159,7 @@ export default function Page() {
               }`}
             >
               <div
-                className={`px-4 py-3 rounded-2xl max-w-xs text-sm shadow 
+                className={`px-4 py-3 rounded-2xl max-w-[80%] text-sm shadow break-words whitespace-pre-wrap leading-relaxed  
                 ${
                   msg.role === "user"
                     ? "bg-blue-600 text-white rounded-br-none"

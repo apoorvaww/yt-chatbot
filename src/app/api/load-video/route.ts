@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         for(const chunk of transcript_list) {
             transcript += " " + chunk.text;
         }
-        console.log("transcript: ", transcript)
+        // console.log("transcript: ", transcript)
         
 
         if (!transcript) {
