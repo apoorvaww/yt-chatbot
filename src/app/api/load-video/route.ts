@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         });
 
         // This creates and stores the collection in your ChromaDB instance
-        const vectorStore = await Chroma.fromDocuments(
+        await Chroma.fromDocuments(
             chunks,
             embeddings, {
                 collectionName: videoId, 
