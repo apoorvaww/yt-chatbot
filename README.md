@@ -52,7 +52,9 @@ ChromaDB persists all processed video embeddings for ultra-fast retrieval.
 
 YouTube Video → Transcript → Chunking → Embedding → ChromaDB
 ↑ ↓
+
 └────────────── User Question → Embedding → Similarity Search
+
 ↓
 LLM (Gemini) with Retrieved Context
 
