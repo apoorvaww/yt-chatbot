@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import yce from 'youtube-caption-extractor';
 import { HuggingFaceInferenceEmbeddings } from '@langchain/community/embeddings/hf';
-import { Chroma } from '@langchain/community/vectorstores/chroma';
+// import { Chroma } from '@langchain/community/vectorstores/chroma';
+import { QdrantClient } from "@qdrant/js-client-rest";
+import {QdrantVectorStore} from '@langchain/qdrant'
 
 export async function POST(request: Request) {
     try {
@@ -53,11 +55,16 @@ export async function POST(request: Request) {
         });
 
         // This creates and stores the collection in your ChromaDB instance
-        await Chroma.fromDocuments(
+        const client = new QdrantClient({
+            url: process.env.QDRANT_URL!,
+            apiKey: process.env.QDRANT_API_KEY!
+        })
+
+        await QdrantVectorStore.fromDocuments(
             chunks,
             embeddings, {
-                collectionName: videoId, 
-                url: "http://127.0.0.1:8000"   
+                client,
+                collectionName: videoId   
             }
         );
 

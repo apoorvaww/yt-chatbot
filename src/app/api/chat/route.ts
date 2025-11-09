@@ -1,5 +1,5 @@
 import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
-import { Chroma } from "@langchain/community/vectorstores/chroma";
+// import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import {
@@ -8,6 +8,8 @@ import {
 } from "@langchain/core/runnables";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { NextRequest, NextResponse } from "next/server";
+import { QdrantVectorStore } from "@langchain/qdrant";
+import { QdrantClient } from "@qdrant/js-client-rest";
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,10 +36,20 @@ export async function POST(request: NextRequest) {
     });
 
     /// connect to the vector store:
-    const vectorStore = await Chroma.fromExistingCollection(embeddings, {
-      collectionName: videoId,
-      url: "http://127.0.0.1:8000",
+    // Connect to Qdrant Cloud
+    const client = new QdrantClient({
+      url: process.env.QDRANT_URL!,
+      apiKey: process.env.QDRANT_API_KEY!,
     });
+
+    // Load the existing collection in Qdrant
+    const vectorStore = await QdrantVectorStore.fromExistingCollection(
+      embeddings,
+      {
+        client,
+        collectionName: videoId,
+      }
+    );
 
     const retriever = vectorStore.asRetriever({ k: 4 });
 
