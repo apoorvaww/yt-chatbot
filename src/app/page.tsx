@@ -1,6 +1,8 @@
 "use client";
 import axios from "axios";
 import React, { useState } from "react";
+// import BubbleBackground from "@/components/BubbleBackground";
+import LiquidEther from "../components/LiquidEther.jsx";
 
 interface Message {
   role: "user" | "bot";
@@ -10,6 +12,7 @@ interface Message {
 interface BackendErrorResponse {
   error: string;
 }
+1;
 interface AxiosErrorResponse {
   response?: {
     data: BackendErrorResponse;
@@ -74,10 +77,10 @@ export default function Page() {
     const userQuestion = question.trim();
     setQuestion("");
 
-    setChatHistory(prev => [
+    setChatHistory((prev) => [
       ...prev,
-      {role: "user", content: userQuestion}
-    ])
+      { role: "user", content: userQuestion },
+    ]);
 
     // const newHistory: Message[] = [
     //   ...chatHistory,
@@ -97,10 +100,7 @@ export default function Page() {
       }
 
       const { answer } = response.data;
-      setChatHistory(prev => [
-        ...prev,
-        {role: "bot", content: answer}
-      ]);
+      setChatHistory((prev) => [...prev, { role: "bot", content: answer }]);
     } catch (error) {
       const axiosError = error as AxiosErrorResponse;
 
@@ -115,38 +115,69 @@ export default function Page() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-8 flex justify-center">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
+    <main className="relative min-h-screen overflow-hidden flex justify-center items-center p-4 md:p-8 text-white">
+      {/* Liquid Effect Behind Everything (UNCHANGED) */}
+      <div className="absolute inset-0 -z-10">
+        <LiquidEther
+          colors={[
+            "#2d0b59", // purple
+            "#120033", // deep violet
+            "#ff4dff", // neon pink/purple glow
+          ]}
+          mouseForce={30}
+          cursorSize={70}
+          isViscous={false}
+          viscous={30}
+          iterationsViscous={32}
+          iterationsPoisson={32}
+          resolution={0.5}
+          isBounce={false}
+          autoDemo={true}
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
+        />
+      </div>
+
+      <div className="absolute inset-0 bg-[#0b0a1f]/90 -z-20" />
+
+      {/* --- OPAQUE CHAT UI CONTAINER --- */}
+      <div className="w-full max-w-2xl h-[90vh] flex flex-col bg-[#0b0a1f] rounded-2xl border border-white/10 shadow-xl p-6">
+        {/* Header */}
+        <h1 className="text-3xl font-bold text-center mb-6 text-white">
           YouTube Video Chatbot
         </h1>
 
-        <form onSubmit={handleProcessVideo} className="flex gap-3 mb-6">
+        {/* Video Loader Form */}
+        <form onSubmit={handleProcessVideo} className="flex gap-3 mb-4">
           <input
             type="text"
             value={videoId}
             onChange={(e) => setVideoId(e.target.value)}
-            placeholder="Enter YouTube Video ID"
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-700"
+            placeholder="Enter YouTube Video ID or URL"
+            className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-pink-500 focus:outline-none text-white placeholder:text-gray-400"
             disabled={isProcessing}
           />
           <button
             type="submit"
             disabled={isProcessing || !videoId}
-            className={`px-5 py-3 rounded-xl text-white font-medium transition 
+            className={`px-5 py-3 rounded-xl text-white font-medium transition duration-200
             ${
               isProcessing || !videoId
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+                ? "bg-gray-600/50 cursor-not-allowed text-gray-400"
+                : "bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400"
             }`}
           >
             {isProcessing ? "Processing..." : "Load"}
           </button>
         </form>
 
-        <div className="h-96 overflow-y-auto border rounded-xl bg-gray-50 p-5 space-y-4 shadow-inner">
+        {/* Chat History */}
+        <div className="flex-1 min-h-0 overflow-y-auto border border-white/10 rounded-xl bg-black/20 p-4 space-y-4 shadow-inner">
           {!videoLoaded && chatHistory.length === 0 && (
-            <p className="text-center text-gray-500">
+            <p className="text-center text-gray-400">
               Load a video to begin chatting...
             </p>
           )}
@@ -159,11 +190,11 @@ export default function Page() {
               }`}
             >
               <div
-                className={`px-4 py-3 rounded-2xl max-w-[80%] text-sm shadow break-words whitespace-pre-wrap leading-relaxed  
+                className={`px-4 py-2.5 rounded-2xl max-w-[80%] text-sm shadow break-words whitespace-pre-wrap leading-relaxed 
                 ${
                   msg.role === "user"
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-gray-200 text-gray-800 rounded-bl-none"
+                    ? "bg-purple-600 text-white rounded-br-none" // User message
+                    : "bg-gray-800/80 text-gray-100 rounded-bl-none" // Bot message
                 }`}
               >
                 {msg.content}
@@ -173,39 +204,42 @@ export default function Page() {
 
           {isReplying && (
             <div className="flex justify-start">
-              <div className="px-4 py-3 rounded-2xl bg-gray-200 text-gray-700 shadow">
-                Thinking...
+              <div className="px-4 py-2.5 rounded-2xl bg-gray-800/80 text-gray-100 shadow rounded-bl-none">
+                <span className="animate-pulse">Thinking...</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Question Input */}
-        <form onSubmit={handleAskQuestion} className="flex gap-3 mt-6">
+        {/* Question Input Form */}
+        <form onSubmit={handleAskQuestion} className="flex gap-3 mt-4">
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Ask a question..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+            className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none text-white placeholder:text-gray-400"
             disabled={!videoLoaded || isReplying}
           />
 
           <button
             type="submit"
             disabled={!videoLoaded || isReplying || !question}
-            className={`px-5 py-3 rounded-xl font-medium text-white transition 
+            className={`px-5 py-3 rounded-xl font-medium text-white transition duration-200
             ${
               !videoLoaded || isReplying || !question
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700"
+                ? "bg-gray-600/50 cursor-not-allowed text-gray-400"
+                : "bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
             }`}
           >
             {isReplying ? "..." : "Send"}
           </button>
         </form>
 
-        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+        {/* Error Message */}
+        {error && (
+          <p className="text-sm text-red-400 text-center mt-3">{error}</p>
+        )}
       </div>
     </main>
   );
